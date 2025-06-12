@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Vendas por Período</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #669fea 0%, #4b76a2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #669fea 0%, #4b76a2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h2 {
+            font-size: 1.2rem;
+            font-weight: 300;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-section h3 {
+            color: #669fea;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .upload-section h3::before {
+            content: '📄';
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .steps {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .steps p {
+            margin: 10px 0;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .convert-btn {
+            background: linear-gradient(135deg, #669fea 0%, #4b76a2 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .file-upload-container {
+            position: relative;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        .file-upload {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .file-upload-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #669fea 0%, #4b76a2 100%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card h3 {
+            color: #669fea;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .table-section {
+            margin: 30px 0;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #669fea 0%, #4b76a2 100%);
+            color: white;
+            padding: 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+            color: #669fea;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        tr {
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+            transform: scale(1.01);
+        }
+
+        .success-message, .error-message {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 600;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #669fea;
+            font-weight: 600;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #669fea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            th, td {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+            
+            .upload-section {
+                padding: 20px;
+            }
+        }
+
+        .icon {
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="icon">📊</span>Relatório de Vendas por Período</h1>
+            <h2>Análise de Vendas por Vendedor - Eriandson Azevedo</h2>
+        </div>
+
+        <div class="content">
+            <div class="upload-section">
+                <h3>Importar Relatório de Vendas por Período</h3>
+                
+                <div class="steps">
+                    <p><strong>1.</strong> Exporte o relatório de vendas por período em PDF do sistema.</p>
+                    
+                    <p><strong>2.</strong> Use o conversor para transformar o PDF em Excel:</p>
+                    <a href="https://www.ilovepdf.com/pt/pdf_para_excel" target="_blank" class="convert-btn">
+                        <span class="icon">📤</span>Converter PDF para Excel
+                    </a>
+                    
+                    <p><strong>3.</strong> No site do conversor: Selecionar arquivo PDF → Layout: Uma folha → Converter para Excel → Baixar</p>
+                    
+                    <p><strong>4.</strong> Selecione o arquivo Excel baixado para análise automática:</p>
+                    <div class="file-upload-container">
+                        <input type="file" accept=".xlsx,.xls" id="excel-upload" class="file-upload" />
+                        <label for="excel-upload" class="file-upload-label">
+                            <span class="icon">📁</span>Escolher Arquivo Excel
+                        </label>
+                    </div>
+                </div>
+
+                <div class="success-message">
+                    <span class="icon">✅</span>Arquivo processado com sucesso!
+                </div>
+                <div class="error-message"></div>
+                <div class="debug-info"></div>
+            </div>
+
+            <div class="loading">Processando dados do relatório...</div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3><span class="icon">💰</span>Total Geral</h3>
+                    <div class="stat-value total-geral">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <h3><span class="icon">👥</span>Total de Vendedores</h3>
+                    <div class="stat-value total-vendedores">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3><span class="icon">🛒</span>Total de Vendas</h3>
+                    <div class="stat-value total-vendas">0</div>
+                </div>
+            </div>
+
+            <div class="table-section">
+                <div class="table-header">
+                    <span class="icon">👥</span>Vendas por Vendedor
+                </div>
+                <table class="vendas-por-vendedor">
+                    <thead>
+                        <tr>
+                            <th>Vendedor</th>
+                            <th>Quantidade de Vendas</th>
+                            <th>Valor Total</th>
+                            <th>Valor Médio por Venda</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function processSalesData(data) {
+            console.log('Processing data:', data);
+            const totalGeral = data.reduce((sum, record) => sum + record.valorTotal, 0);
+            const uniqueVendedores = [...new Set(data.map(record => record.vendedor))].length;
+            const totalVendas = data.length;
+
+            const vendasPorVendedor = data.reduce((acc, record) => {
+                const vendedor = record.vendedor;
+                if (!acc[vendedor]) {
+                    acc[vendedor] = { vendas: 0, valorTotal: 0 };
+                }
+                acc[vendedor].vendas += 1;
+                acc[vendedor].valorTotal += record.valorTotal;
+                return acc;
+            }, {});
+
+            return { totalGeral, uniqueVendedores, totalVendas, vendasPorVendedor };
+        }
+
+        function updateHtmlReport(data) {
+            console.log('Updating HTML with data:', data);
+            const { totalGeral, uniqueVendedores, totalVendas, vendasPorVendedor } = processSalesData(data);
+
+            // Hide loading message
+            document.querySelector('.loading').style.display = 'none';
+
+            document.querySelector('.total-geral').textContent = `R$ ${totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.querySelector('.total-vendedores').textContent = uniqueVendedores;
+            document.querySelector('.total-vendas').textContent = totalVendas;
+
+            const vendedorTableBody = document.querySelector('.vendas-por-vendedor tbody');
+            vendedorTableBody.innerHTML = '';
+            
+            // Ordenar vendedores por valor total (decrescente)
+            const sortedVendedores = Object.keys(vendasPorVendedor).sort((a, b) => {
+                return vendasPorVendedor[b].valorTotal - vendasPorVendedor[a].valorTotal;
+            });
+            
+            sortedVendedores.forEach(vendedor => {
+                const vendedorData = vendasPorVendedor[vendedor];
+                const valorMedio = vendedorData.valorTotal / vendedorData.vendas;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${vendedor}</strong></td>
+                    <td>${vendedorData.vendas}</td>
+                    <td>R$ ${vendedorData.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                    <td>R$ ${valorMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                `;
+                vendedorTableBody.appendChild(row);
+            });
+
+            document.querySelector('.success-message').style.display = 'block';
+            document.querySelector('.error-message').style.display = 'none';
+        }
+
+        function parseNumericValue(value) {
+            if (!value) return 0;
+            
+            // Converte para string e remove espaços
+            let strValue = String(value).trim();
+            
+            // Se já é um número, retorna
+            if (!isNaN(strValue) && strValue !== '') {
+                return parseFloat(strValue);
+            }
+            
+            // Remove R$, espaços e outros caracteres não numéricos exceto vírgula e ponto
+            strValue = strValue.replace(/[R$\s]/g, '');
+            
+            // Se contém vírgula, assume formato brasileiro (1.234,56)
+            if (strValue.includes(',')) {
+                // Remove pontos (separadores de milhares) e substitui vírgula por ponto
+                strValue = strValue.replace(/\./g, '').replace(',', '.');
+            }
+            
+            const numValue = parseFloat(strValue);
+            return isNaN(numValue) ? 0 : numValue;
+        }
+
+        async function parseExcel(file) {
+            try {
+                console.log('Starting Excel parsing for file:', file.name);
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheet];
+                    const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false });
+                    
+                    console.log('Raw sheet data:', sheetData);
+                    
+                    let salesData = [];
+                    const validVendedores = ['Aport', 'Sem vendedor', 'Aparecida', 'Eliane', 'Ylaneide Barbosa', 'Carmezia'];
+
+                    // Procurar por linha de cabeçalho
+                    let headerRowIndex = -1;
+                    for (let i = 0; i < sheetData.length; i++) {
+                        const row = sheetData[i];
+                        if (row && row.some(cell => typeof cell === 'string' && cell.match(/OPERADOR|VENDEDOR|PRODUTO|TOTAL/i))) {
+                            headerRowIndex = i;
+                            console.log(`Header found at row ${i}:`, row);
+                            break;
+                        }
+                    }
+
+                    if (headerRowIndex === -1) {
+                        console.log('Header not found, starting from row 0');
+                        headerRowIndex = 0;
+                    }
+
+                    // Processar dados linha por linha
+                    for (let i = headerRowIndex + 1; i < sheetData.length; i++) {
+                        const row = sheetData[i];
+                        if (!row || row.length < 13) { // Precisa ter pelo menos 13 colunas (até M)
+                            console.log(`Skipping incomplete row ${i}: only ${row ? row.length : 0} columns`);
+                            continue;
+                        }
+
+                        // Coluna E (índice 4) = Vendedor
+                        const vendedorCell = row[4] ? String(row[4]).trim() : '';
+                        
+                        // Coluna M (índice 12) = Valor Total
+                        const valorCell = row[12];
+                        
+                        console.log(`Row ${i}: Column E="${vendedorCell}", Column M="${valorCell}"`);
+
+                        // Verificar se o vendedor é válido
+                        let vendedorEncontrado = '';
+                        for (const vendedor of validVendedores) {
+                            if (vendedorCell.includes(vendedor)) {
+                                vendedorEncontrado = vendedor;
+                                break;
+                            }
+                        }
+
+                        if (!vendedorEncontrado) {
+                            console.log(`No valid vendedor found in row ${i}: "${vendedorCell}"`);
+                            continue;
+                        }
+
+                        const valorTotal = parseNumericValue(valorCell);
+                        
+                        if (valorTotal === 0) {
+                            console.log(`No valid value in column M for row ${i}: "${valorCell}"`);
+                            continue;
+                        }
+
+                        const rowData = { vendedor: vendedorEncontrado, valorTotal };
+                        salesData.push(rowData);
+                        console.log(`Added row data:`, rowData);
+                    }
+
+                    console.log(`Total valid rows parsed: ${salesData.length}`);
+                    console.log('All parsed data:', salesData);
+
+                    if (salesData.length > 0) {
+                        updateHtmlReport(salesData);
+                    } else {
+                        const errorMsg = 'Nenhum dado válido encontrado no Excel. Verifique se:\n- A coluna E contém os nomes dos vendedores (Aport, Sem vendedor, Aparecida, Eliane, Ylaneide Barbosa, Carmezia)\n- A coluna M contém os valores de "Total de Venda"';
+                        console.error(errorMsg);
+                        document.querySelector('.error-message').textContent = errorMsg;
+                        document.querySelector('.error-message').style.display = 'block';
+                        document.querySelector('.loading').style.display = 'none';
+                    }
+                };
+
+                reader.onerror = (error) => {
+                    const errorMsg = `Erro ao ler o arquivo Excel: ${error.message}`;
+                    console.error(errorMsg, error);
+                    document.querySelector('.error-message').textContent = errorMsg;
+                    document.querySelector('.error-message').style.display = 'block';
+                    document.querySelector('.loading').style.display = 'none';
+                };
+
+                reader.readAsArrayBuffer(file);
+            } catch (error) {
+                const errorMsg = `Erro ao processar o Excel: ${error.message}`;
+                console.error(errorMsg, error);
+                document.querySelector('.error-message').textContent = errorMsg;
+                document.querySelector('.error-message').style.display = 'block';
+                document.querySelector('.loading').style.display = 'none';
+            }
+        }
+
+        document.getElementById('excel-upload').addEventListener('change', async (event) => {
+            console.log('File input changed');
+            const file = event.target.files[0];
+            if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+                console.log('Valid Excel file selected:', file.name);
+                document.querySelector('.error-message').style.display = 'none';
+                document.querySelector('.success-message').style.display = 'none';
+                document.querySelector('.debug-info').style.display = 'none';
+                document.querySelector('.loading').style.display = 'block';
+                await parseExcel(file);
+            } else {
+                const errorMsg = 'Por favor, selecione um arquivo Excel válido (.xlsx ou .xls).';
+                console.error(errorMsg);
+                document.querySelector('.error-message').textContent = errorMsg;
+                document.querySelector('.error-message').style.display = 'block';
+                document.querySelector('.loading').style.display = 'none';
+            }
+        });
+
+        // Ocultar loading inicialmente
+        document.querySelector('.loading').style.display = 'none';
+    </script>
+</body>
+</html>
