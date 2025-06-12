@@ -532,7 +532,6 @@
                     console.log('Raw sheet data:', sheetData);
                     
                     let salesData = [];
-                    const validVendedores = ['Aport', 'Sem vendedor', 'Aparecida', 'Eliane', 'Ylaneide Barbosa', 'Carmezia'];
 
                     // Procurar por linha de cabeçalho
                     let headerRowIndex = -1;
@@ -566,17 +565,9 @@
                         
                         console.log(`Row ${i}: Column E="${vendedorCell}", Column M="${valorCell}"`);
 
-                        // Verificar se o vendedor é válido
-                        let vendedorEncontrado = '';
-                        for (const vendedor of validVendedores) {
-                            if (vendedorCell.includes(vendedor)) {
-                                vendedorEncontrado = vendedor;
-                                break;
-                            }
-                        }
-
-                        if (!vendedorEncontrado) {
-                            console.log(`No valid vendedor found in row ${i}: "${vendedorCell}"`);
+                        // Verificar se há vendedor na coluna E (qualquer texto não vazio)
+                        if (!vendedorCell || vendedorCell === '') {
+                            console.log(`No vendedor found in column E for row ${i}`);
                             continue;
                         }
 
@@ -587,7 +578,7 @@
                             continue;
                         }
 
-                        const rowData = { vendedor: vendedorEncontrado, valorTotal };
+                        const rowData = { vendedor: vendedorCell, valorTotal };
                         salesData.push(rowData);
                         console.log(`Added row data:`, rowData);
                     }
@@ -598,7 +589,7 @@
                     if (salesData.length > 0) {
                         updateHtmlReport(salesData);
                     } else {
-                        const errorMsg = 'Nenhum dado válido encontrado no Excel. Verifique se:\n- A coluna E contém os nomes dos vendedores (Aport, Sem vendedor, Aparecida, Eliane, Ylaneide Barbosa, Carmezia)\n- A coluna M contém os valores de "Total de Venda"';
+                        const errorMsg = 'Nenhum dado válido encontrado no Excel. Verifique se:\n- A coluna E contém os nomes dos vendedores\n- A coluna M contém os valores de "Total de Venda"\n- Há dados válidos no arquivo';
                         console.error(errorMsg);
                         document.querySelector('.error-message').textContent = errorMsg;
                         document.querySelector('.error-message').style.display = 'block';
